@@ -2,6 +2,6 @@
 
 #### API use is Cat API
 
-<img align='center' width:'400px' height:'400px'src='./pic1.png' />
+<img width='450px' height='450px' align='center' src='./pic1.png' >
 
-<img width:'400px' height:'400px' src='./pic2.png' align='center' />
+<img width='450px' height='450px' align='center' src='./pic2.png' >
