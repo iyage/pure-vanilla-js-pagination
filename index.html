@@ -85,21 +85,33 @@
       .info {
         padding: 5px;
       }
+      .loader {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     </style>
   </head>
   <body>
     <div id="container">
-      <div class="wrapper"></div>
-      <div class="pagination-container">
-        <select name="" id="select-range">
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-        </select>
-        <button class="btn" id="prev" onclick="changePage('prev')"><</button>
-        <div id="pages"></div>
-        <button class="btn" id="next" onclick="changePage('next')">></button>
+      <div class="loader">
+        <img src="./Loading_icon.gif" alt="" />
+      </div>
+      <div class="content">
+        <div class="wrapper"></div>
+        <div class="pagination-container">
+          <select name="" id="select-range">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+          </select>
+          <button class="btn" id="prev" onclick="changePage('prev')"><</button>
+          <div id="pages"></div>
+          <button class="btn" id="next" onclick="changePage('next')">></button>
+        </div>
       </div>
     </div>
 
@@ -110,6 +122,7 @@
       let currenPage = 0;
       let lastIndex = itemPerPage;
       const pages = [];
+      document.querySelector(".content").style.display = "none";
       currenPage === 0 &&
         document.querySelector("#prev").setAttribute("disabled", true);
       load_pics();
@@ -126,8 +139,11 @@
             }
           );
           photos = await resp.json();
+          document.querySelector(".content").style.display = "block";
+          document.querySelector(".loader").style.display = "none";
         } catch (err) {
           console.log(err);
+          document.querySelector(".loader").style.display = "none";
         }
         return photos;
       }
