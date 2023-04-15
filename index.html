@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+      }
+      #container {
+        width: 90%;
+        margin: auto;
+        margin-top: 70px;
+      }
+      .wrapper {
+        display: flex;
+        row-gap: 20px;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+      }
+      .card {
+        flex: 18%;
+        flex-grow: 0;
+        border: 1px solid black;
+        box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+      }
+      .photo-container {
+        width: 100%;
+        height: 200px;
+      }
+      .photo {
+        height: 100%;
+        width: 100%;
+        border-radius: 10px 10px 0 0;
+        object-fit: cover;
+      }
+      .pagination-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+        padding: 20px;
+        align-items: center;
+        justify-content: end;
+      }
+      .btn {
+        height: 30px;
+        width: 30px;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: solid 1px black;
+        cursor: pointer;
+        font-weight: 700;
+        background-color: transparent;
+      }
+      #pages {
+        display: flex;
+        gap: 10px;
+      }
+      .page {
+        height: 15px;
+        width: 15px;
+        border-radius: 50%;
+        border: 1px solid black;
+        font-size: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+      .class-active {
+        background-color: black;
+        color: white;
+      }
+      select {
+        height: 30px;
+        padding: 0px 10px;
+      }
+      .info {
+        padding: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="wrapper"></div>
+      <div class="pagination-container">
+        <select name="" id="select-range">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+        </select>
+        <button class="btn" id="prev" onclick="changePage('prev')"><</button>
+        <div id="pages"></div>
+        <button class="btn" id="next" onclick="changePage('next')">></button>
+      </div>
+    </div>
+
+    <script>
+      let photos = [];
+      let numberOfPages = 0;
+      let itemPerPage = 5;
+      let currenPage = 0;
+      let lastIndex = itemPerPage;
+      const pages = [];
+      currenPage === 0 &&
+        document.querySelector("#prev").setAttribute("disabled", true);
+      load_pics();
+      async function getPhotos() {
+        let photos = [];
+        try {
+          const resp = await fetch(
+            "https://api.thecatapi.com/v1/images/search?limit=100",
+            {
+              headers: {
+                "x-api-key":
+                  "live_AiRs9e84CzNIGXeKkkrNtrOL8WG9am09efJNAGUJTAQ8Cj7dq2JgoFNTCljuulWJ",
+              },
+            }
+          );
+          photos = await resp.json();
+        } catch (err) {
+          console.log(err);
+        }
+        return photos;
+      }
+      function disPlayImg(photos, currenPage, lastIndex) {
+        document.querySelector(".wrapper").innerHTML = "";
+        let catList = photos.slice(currenPage, lastIndex);
+        console.log(catList);
+        catList.forEach((cat) => {
+          let card = document.createElement("div");
+          let container = document.createElement("div");
+          let height = document.createElement("h5");
+          let width = document.createElement("h5");
+          let img = document.createElement("img");
+          img.setAttribute("src", cat.url);
+          height.innerText = "height : " + cat?.height;
+          width.innerText = "width : " + cat?.width;
+          height.className = "info";
+          width.className = "info";
+          img.className = "photo";
+          container.className = "photo-container";
+          container.append(img);
+          card.className = "card";
+          card.append(container);
+          card.append(height);
+          card.append(width);
+          document.querySelector(".wrapper").append(card);
+        });
+      }
+      async function load_pics() {
+        photos = await getPhotos();
+        numberOfPages = Math.ceil(photos.length / itemPerPage);
+        disPlayImg(photos, currenPage, lastIndex);
+        displayPages(numberOfPages);
+      }
+      document
+        .getElementById("select-range")
+        .addEventListener("change", (e) => {
+          changeNumbberPerpage(e.target.value);
+        });
+
+      function changeNumbberPerpage(val) {
+        itemPerPage = parseInt(val);
+        currenPage = 0;
+        lastIndex = currenPage + itemPerPage;
+        numberOfPages = Math.ceil(photos.length / itemPerPage);
+        disPlayImg(photos, currenPage, lastIndex);
+        displayPages(numberOfPages);
+      }
+
+      function displayPages(numberOfPages) {
+        document.getElementById("pages").innerHTML = "";
+        for (let i = 0; i < numberOfPages; i++) {
+          let span = document.createElement("span");
+          span.innerText = i + 1;
+          span.className = "page";
+          i === 0
+            ? (span.className = "page class-active")
+            : (span.className = "page");
+          span.addEventListener("click", () => {
+            currenPage = i * itemPerPage;
+            lastIndex = currenPage + itemPerPage;
+            disPlayImg(photos, currenPage, lastIndex);
+            currenPage === 0
+              ? document.querySelector("#prev").setAttribute("disabled", true)
+              : document.querySelector("#prev").removeAttribute("disabled");
+            lastIndex === photos.length
+              ? document.querySelector("#next").setAttribute("disabled", true)
+              : document.querySelector("#next").removeAttribute("disabled");
+            handleActiveClass(i);
+          });
+          document.getElementById("pages").append(span);
+        }
+      }
+      function handleActiveClass(pos) {
+        document.querySelectorAll(".page").forEach((elem, index) => {
+          console.log(pos);
+          pos === index
+            ? (elem.className = "page class-active")
+            : (elem.className = "page");
+        });
+      }
+      function changePage(direction) {
+        if (direction === "next") {
+          currenPage = currenPage + itemPerPage;
+          lastIndex = lastIndex + itemPerPage;
+          disPlayImg(photos, currenPage, lastIndex);
+          lastIndex === photos.length &&
+            document.querySelector("#next").setAttribute("disabled", true);
+          document.querySelector("#prev").removeAttribute("disabled");
+          handleActiveClass(currenPage / itemPerPage);
+        }
+        if (direction === "prev") {
+          currenPage = currenPage - itemPerPage;
+          lastIndex = lastIndex - itemPerPage;
+          disPlayImg(photos, currenPage, lastIndex);
+          currenPage === 0 &&
+            document.querySelector("#prev").setAttribute("disabled", true);
+          document.querySelector("#next").removeAttribute("disabled");
+          handleActiveClass(currenPage / itemPerPage);
+        }
+      }
+    </script>
+  </body>
+</html>
