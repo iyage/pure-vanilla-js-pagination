@@ -190,6 +190,7 @@
         });
 
       function changeNumbberPerpage(val) {
+        document.querySelector("#prev").setAttribute("disabled", true);
         itemPerPage = parseInt(val);
         currenPage = 0;
         lastIndex = currenPage + itemPerPage;
