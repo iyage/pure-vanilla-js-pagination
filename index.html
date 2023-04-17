@@ -116,7 +116,7 @@
     </div>
 
     <script>
-      let photos = [];
+      let products = [];
       let numberOfPages = 0;
       let itemPerPage = 5;
       let currenPage = 0;
@@ -126,40 +126,44 @@
       currenPage === 0 &&
         document.querySelector("#prev").setAttribute("disabled", true);
       load_pics();
-      async function getPhotos() {
-        let photos = [];
+      async function getProducts() {
+        let products = [];
         try {
           const resp = await fetch(
-            "https://api.thecatapi.com/v1/images/search?limit=100",
-            {
-              headers: {
-                "x-api-key":
-                  "live_AiRs9e84CzNIGXeKkkrNtrOL8WG9am09efJNAGUJTAQ8Cj7dq2JgoFNTCljuulWJ",
-              },
-            }
+            "https://dummyjson.com/products"
+            // {
+            //   headers: {
+            //     "x-api-key":
+            //       "live_AiRs9e84CzNIGXeKkkrNtrOL8WG9am09efJNAGUJTAQ8Cj7dq2JgoFNTCljuulWJ",
+            //   },
+            // }
           );
-          photos = await resp.json();
+          const fetchData = await resp.json();
+          products = fetchData.products;
+
           document.querySelector(".content").style.display = "block";
           document.querySelector(".loader").style.display = "none";
         } catch (err) {
           console.log(err);
           document.querySelector(".loader").style.display = "none";
         }
-        return photos;
+        return products;
       }
-      function disPlayImg(photos, currenPage, lastIndex) {
+      function disPlayImg(products, currenPage, lastIndex) {
         document.querySelector(".wrapper").innerHTML = "";
-        let catList = photos.slice(currenPage, lastIndex);
-        console.log(catList);
-        catList.forEach((cat) => {
+        let productList = products.slice(currenPage, lastIndex);
+        productList.forEach((prod) => {
           let card = document.createElement("div");
+          let description = document.createElement("div");
           let container = document.createElement("div");
           let height = document.createElement("h5");
           let width = document.createElement("h5");
           let img = document.createElement("img");
-          img.setAttribute("src", cat.url);
-          height.innerText = "height : " + cat?.height;
-          width.innerText = "width : " + cat?.width;
+          img.setAttribute("src", prod.images[0]);
+          height.innerText = "Brand : " + prod?.brand;
+          width.innerText = "Category : " + prod?.category;
+          description.innerHTML = "<h2>Description</h2><p>" + prod?.description;
+          description.style.padding = "20px";
           height.className = "info";
           width.className = "info";
           img.className = "photo";
@@ -169,13 +173,14 @@
           card.append(container);
           card.append(height);
           card.append(width);
+          card.append(description);
           document.querySelector(".wrapper").append(card);
         });
       }
       async function load_pics() {
-        photos = await getPhotos();
-        numberOfPages = Math.ceil(photos.length / itemPerPage);
-        disPlayImg(photos, currenPage, lastIndex);
+        products = await getProducts();
+        numberOfPages = Math.ceil(products.length / itemPerPage);
+        disPlayImg(products, currenPage, lastIndex);
         displayPages(numberOfPages);
       }
       document
@@ -188,8 +193,8 @@
         itemPerPage = parseInt(val);
         currenPage = 0;
         lastIndex = currenPage + itemPerPage;
-        numberOfPages = Math.ceil(photos.length / itemPerPage);
-        disPlayImg(photos, currenPage, lastIndex);
+        numberOfPages = Math.ceil(products.length / itemPerPage);
+        disPlayImg(products, currenPage, lastIndex);
         displayPages(numberOfPages);
       }
 
@@ -205,11 +210,11 @@
           span.addEventListener("click", () => {
             currenPage = i * itemPerPage;
             lastIndex = currenPage + itemPerPage;
-            disPlayImg(photos, currenPage, lastIndex);
+            disPlayImg(products, currenPage, lastIndex);
             currenPage === 0
               ? document.querySelector("#prev").setAttribute("disabled", true)
               : document.querySelector("#prev").removeAttribute("disabled");
-            lastIndex === photos.length
+            lastIndex === products.length
               ? document.querySelector("#next").setAttribute("disabled", true)
               : document.querySelector("#next").removeAttribute("disabled");
             handleActiveClass(i);
@@ -229,8 +234,8 @@
         if (direction === "next") {
           currenPage = currenPage + itemPerPage;
           lastIndex = lastIndex + itemPerPage;
-          disPlayImg(photos, currenPage, lastIndex);
-          lastIndex === photos.length &&
+          disPlayImg(products, currenPage, lastIndex);
+          lastIndex === products.length &&
             document.querySelector("#next").setAttribute("disabled", true);
           document.querySelector("#prev").removeAttribute("disabled");
           handleActiveClass(currenPage / itemPerPage);
@@ -238,7 +243,7 @@
         if (direction === "prev") {
           currenPage = currenPage - itemPerPage;
           lastIndex = lastIndex - itemPerPage;
-          disPlayImg(photos, currenPage, lastIndex);
+          disPlayImg(products, currenPage, lastIndex);
           currenPage === 0 &&
             document.querySelector("#prev").setAttribute("disabled", true);
           document.querySelector("#next").removeAttribute("disabled");
